@@ -26,7 +26,9 @@ describe('test cases for todos', () => {
         // cy.wrap('Walk the dog').should('exist')
         // })
     })
-    // in default tasks can not change second task (Walk the dog) to completed 
+
+    //bug
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
     it('add new task and verify it is added', () => {
         // cy.get('.new-todo').type('new task {enter}')
         insert('new task {enter}')
@@ -38,7 +40,9 @@ describe('test cases for todos', () => {
         // cy.get('.todo-list li').should('have.length', 2)//
         verify_length(2)
     })
-    //we can add task to list if we fill plain text and click in "All" button
+
+    //bug
+    //Adding Task to List via Plain Text Entry and "All" Button Functionality
     it('insert using click "All" button ', () => {
         // cy.get('.new-todo').type('new task')
         insert('new task')
@@ -47,7 +51,9 @@ describe('test cases for todos', () => {
         // cy.get('.todo-list li').should('have.length', 2)//
         verify_length(2)
     })
-    //we can add task to list if we fill plain text and click in "Active" button
+
+    //bug
+    //Adding Task to List via Plain Text Entry and "Active" Button Functionality
     it('insert using click "Active" button" (bug)', () => {
         // cy.get('.new-todo').type('new task')
         insert('new task')
@@ -56,7 +62,9 @@ describe('test cases for todos', () => {
         // cy.get('.todo-list li').should('have.length', 2)//
         verify_length(2)
     })
-    //we can add task to list if we fill plain text and click in "Completed" button
+
+    //bug
+    //Adding Task to List via Plain Text Entry and "Completed" Button Functionality
     it('insert using click "Complete" button (bug)', () => {
         // cy.get('.new-todo').type('new task')
         insert('new task')
@@ -65,7 +73,9 @@ describe('test cases for todos', () => {
         // cy.get('.todo-list li').should('have.length', 2)//
         verify_length(2)
     })
-    //we can add task to list if we fill plain text and click in "Clear completed" button
+
+    //bug
+    //Adding Task to List via Plain Text Entry and "Clear completed" Button Functionality
     it('insert using click "Clear completed" button (bug)', () => {
         // cy.get('.new-todo').type('new task{enter}')
         insert('new task {enter}')
@@ -114,7 +124,9 @@ describe('test cases for todos', () => {
             cy.wrap($li).should('have.class', '')
         })
     })
-    // in default tasks can not change second task (Walk the dog) to completed 
+
+    //bug
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
     it.only('Verify Active task empty when all task is completed', () => {
         cy.get('.todo-list li').each(($li) => {
             cy.wrap($li).parent().find('input').check()
@@ -154,7 +166,7 @@ describe('test cases for todos', () => {
         // cy.get('.todo-list li').should('have.length', 0)//
         verify_length(0)
     })
-    it('Hidden task from active tasks list when change task state to completed', () => {
+    it('Verify Hidden Task Upon Changing State to Completed in Active Tasks List', () => {
         cy.get('[href="#/active"]').click()
         // cy.contains('Pay electric bill').parent().find('input').check()
         cheak('Pay electric bill')
@@ -163,7 +175,7 @@ describe('test cases for todos', () => {
         click('[href="#/completed"]')
         cy.get('.todo-list').should('contain', 'Pay electric bill');
     })
-    it('Hidden task from completed tasks list when change task state to active', () => {
+    it('Verify Hidden Task Upon Changing State to Active in Completed Tasks List', () => {
         // cy.get('.new-todo').type('new task {enter}')
         insert('new task {enter}')
         // cy.contains('new task').parent().find('input').check()
@@ -225,7 +237,7 @@ describe('test cases for todos', () => {
         cy.contains('Pay electric bill').parent().find('input').uncheck()
         cy.contains('Pay electric bill').parent().parent().should('have.class', '')
     })
-    // in default tasks can not change second task (Walk the dog) to completed 
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
     it('change all tasks to completed using button above  "toggle button"', () => {
         // cy.get('.main [for="toggle-all"]').click()
         click('.main [for="toggle-all"]')
@@ -233,7 +245,9 @@ describe('test cases for todos', () => {
             cy.wrap($li).should('have.class', 'completed')
         })
     })
-    // in default tasks can not change second task (Walk the dog) to completed 
+
+    //bug
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
     it('change all tasks to active using button above checkboxs "toggle button"', () => {
         cy.get('.todo-list li').each(($li) => {
             cy.wrap($li).parent().find('input').check()
@@ -244,7 +258,9 @@ describe('test cases for todos', () => {
             cy.wrap($li).should('have.class', '')
         })
     })
-    // in default tasks can not change second task (Walk the dog) to completed 
+
+    //bug
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed
     it('change all tasks to active using button above checkboxs "toggle button"', () => {
         // cy.get('.main [for="toggle-all"]').click()
         click('.main [for="toggle-all"]')
