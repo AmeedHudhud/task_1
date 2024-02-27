@@ -1,65 +1,80 @@
 
 //type : all,active,completed
-const checkListLength = (length, type) => {
-    if (type == 'all') {
-        displayAndSwitchTaskType('all')
-        cy.get('.todo-list li').should('have.length', length);
-    } else if (type == 'active') {
-        displayAndSwitchTaskType('active')
-        cy.get('.todo-list li').should('have.length', length);
-    }
-    else if (type == 'completed') {
-        displayAndSwitchTaskType('completed')
-        cy.get('.todo-list li').should('have.length', length);
-    }
+const checkListLength = (length, type) => {//edit
+    displayAndSwitchTaskType(type)
+    cy.get('.todo-list li')
+      .should('have.length', length);
 }
 //type : all,active,completed
-const displayAndSwitchTaskType = (type) => {
+const displayAndSwitchTaskType = (type) => {//edit
     if (type == 'all') {
-        cy.get('.todo-list li').get('[href="#/"]').click()
-    } else if (type == 'active') {
-        cy.get('.todo-list li').get('[href="#/active"]').click()
-    } else if (type == 'completed') {
-        cy.get('.todo-list li').get('[href="#/completed"]').click()
+        cy.get('.todo-list li')
+          .get('[href="#/"]')
+          .click()
+    }else{
+        cy.get('.todo-list li')
+          .get(`[href="#/${type}"]`)
+          .click()
     }
 }
 const clearTasks = (taskname = null) => {
     if (taskname == null) {
-        cy.get('.clear-completed').click()
+        cy.get('.clear-completed')
+          .click()
     } else {
-        cy.contains(taskname).parent().find('.destroy').click({ force: true })
+        cy.contains(taskname)
+          .parent()
+          .find('.destroy')
+          .click({ force: true })
     }
 }
-const addTaskToList = (taskname) => {
-    cy.get('.todo-list').get('.new-todo').type(taskname)
+const addTaskToList = (taskname) => {//edit
+    cy.get('.new-todo')
+      .clear()
+      .type(taskname)
 }
 //status : active,completed
 const changeTaskStatus = (taskname, status) => {
     displayAndSwitchTaskType('all')
     if (status == 'completed') {
-        cy.contains(taskname).parent().find('input').check()
+        cy.contains(taskname)
+          .parent()
+          .find('input')
+          .check()
     } else {
-        cy.contains(taskname).parent().find('input').uncheck()
+        cy.contains(taskname)
+          .parent()
+          .find('input')
+          .uncheck()
     }
 }
-
-const verifyTheExisenceOfTask = (taskname, option) => {
-    if (option == 'exist') {
-        cy.get('.todo-list li').should('contain', taskname)
-    } else if (option == 'not exist') {
-        cy.get('.todo-list li').should('not.contain', taskname)
-    }
+const verifyTheExisenceOfTask = (taskname, option) => {//edit
+    let x = (option=='exist') ? 'contain' : 'not contain'
+    cy.get('.todo-list li')
+      .should(x, taskname)
 }
 const changeTaskName = (oldname, newname) => {
-    cy.contains(oldname).dblclick()
-    cy.contains(oldname).parent().parent().should('have.class', 'editing')
-    cy.contains(oldname).parent().get('.edit').clear().type(newname)
+    cy.contains(oldname)
+      .dblclick()
+    
+    cy.contains(oldname)
+      .parent()
+      .parent()
+      .should('have.class', 'editing')
+    
+    cy.contains(oldname)
+      .parent()
+      .get('.edit')
+      .clear()
+      .type(newname)
 }
 const toggleClick = () => {
-    cy.get('.main [for="toggle-all"]').click()
+    cy.get('.main [for="toggle-all"]')
+      .click()
 }
 const checkElementAttribute = (element, shouldtype, attribut_type, attribute_value) => {
-    cy.get(element).should(shouldtype, attribut_type, attribute_value)
+    cy.get(element)
+      .should(shouldtype, attribut_type, attribute_value)
 }
 const changeArrayTaskStatus = (taskname, status) => {
     displayAndSwitchTaskType('all')
@@ -78,16 +93,14 @@ describe('test cases for todos', () => {
     beforeEach(() => {
         cy.visit('https://example.cypress.io/todo#/');
     })
-    it('Verify the list contains two default tasks', () => {
+    it.only('Verify the list contains two default tasks', () => {
         cy.get('.todo-list').should('be.visible');
         checkListLength(2, 'all')
         verifyTheExisenceOfTask('Pay electric bill', 'exist')
         verifyTheExisenceOfTask('Walk the dog', 'exist')
     })
 
-    //bug
-    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
-    it('add new task and verify it is added (bug)', () => {
+    it.only('add new task and verify it is added', () => {
         addTaskToList('new task{enter}')
         verifyTheExisenceOfTask('new task', 'exist')
         checkListLength(3, 'all')
@@ -133,7 +146,7 @@ describe('test cases for todos', () => {
         changeTaskName('Pay electric bill', 'new task')
         verifyTheExisenceOfTask('Pay electric bill', 'all')
     })
-    it('Verify "All" button will contain all task', () => {
+    it.only('Verify "All" button will contain all task', () => {
         addTaskToList('new task {enter}')
         changeTaskStatus('new task', 'completed')
         checkListLength(3, 'all')
