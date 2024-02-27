@@ -33,7 +33,7 @@ const clearTasks = (taskname=null) => {
 const addTaskToList = (taskname) => {
     cy.get('.todo-list').get('.new-todo').type(taskname)
 }
-//status : active,completed ,, send current status
+//status : active,completed
 const changeTaskStatus = (taskname,status) => {
         displayAndSwitchTaskType('all')
         if(status=='completed'){
