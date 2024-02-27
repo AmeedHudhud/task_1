@@ -1,14 +1,64 @@
-function verify_length($x){
-    cy.get('.todo-list li').should('have.length',$x)
+
+//type : all,active,completed
+const checkListLength = (length,type) => {
+    if(type=='all'){
+        displayAndSwitchTaskType('all')
+        cy.get('.todo-list li').should('have.length', length);
+    }else if(type=='active'){
+        displayAndSwitchTaskType('active')
+        cy.get('.todo-list li').should('have.length', length);
+    }
+    else if(type=='completed'){
+        displayAndSwitchTaskType('completed')
+        cy.get('.todo-list li').should('have.length', length);
+    }
 }
-function click($x){
-    cy.get($x).click()
+//type : all,active,completed
+const displayAndSwitchTaskType = (type) =>{
+    if(type=='all'){
+        cy.get('.todo-list li').get('[href="#/"]').click()
+    }else if(type=='active'){
+        cy.get('.todo-list li').get('[href="#/active"]').click()
+    }else if(type=='completed'){
+        cy.get('.todo-list li').get('[href="#/completed"]').click()
+    }
 }
-function insert($x){
-    cy.get('.new-todo').type($x)
+const clearTasks = (taskname=null) => {
+    if(taskname==null){
+        cy.get('.clear-completed').click()
+    }else{
+        cy.contains(taskname).parent().find('.destroy').click({ force: true })
+    }
 }
-function cheak($x){
-    cy.contains($x).parent().find('input').check()
+const addTaskToList = (taskname) => {
+    cy.get('.todo-list').get('.new-todo').type(taskname)
+}
+//status : active,completed ,, send current status
+const changeTaskStatus = (taskname,status) => {
+        displayAndSwitchTaskType('all')
+        if(status=='completed'){
+            cy.contains(taskname).parent().find('input').check()
+        }else{
+            cy.contains(taskname).parent().find('input').uncheck()
+        }
+}
+const verifyTheExisenceOfTask = (taskname,option) => {
+    if(option=='exist'){
+        cy.get('.todo-list li').should('contain',taskname)
+    }else if(option=='not exist'){
+        cy.get('.todo-list li').should('not.contain',taskname)
+    }
+}
+const changeTaskName = (oldname,newname) => {
+    cy.contains(oldname).dblclick()
+    cy.contains(oldname).parent().parent().should('have.class', 'editing')
+    cy.contains(oldname).parent().get('.edit').clear().type(newname)
+}
+const toggleClick = () => {
+    cy.get('.main [for="toggle-all"]').click()
+}
+const checkElementAttribute = (element,shouldtype,attribut_type,attribute_value) => {
+    cy.get(element).should(shouldtype,attribut_type,attribute_value)
 }
 describe('test cases for todos', () => {
     beforeEach(()=>{
@@ -16,260 +66,175 @@ describe('test cases for todos', () => {
     })
     it('Verify the list contains two default tasks', () => {
         cy.get('.todo-list').should('be.visible');
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
-        cy.get('.todo-list li').eq(0).invoke('text').should('eq','Pay electric bill')
-        cy.get('.todo-list li').eq(1).invoke('text').should('eq','Walk the dog')
-
-        // cy.get('.todo-list li').within(()=>{
-        // cy.wrap('Pay electric bill').should('exist')
-        // cy.wrap('Walk the dog').should('exist')
-        // })
+        checkListLength(2,'all')
+            verifyTheExisenceOfTask('Pay electric bill','exist')
+            verifyTheExisenceOfTask('Walk the dog','exist')
     })
 
     //bug
     // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
-    it('add new task and verify it is added', () => {
-        // cy.get('.new-todo').type('new task {enter}')
-        insert('new task {enter}')
-        cy.get('.todo-list li').should('contain', 'new task')
+    it('add new task and verify it is added (bug)', () => {
+        addTaskToList('new task{enter}')
+        verifyTheExisenceOfTask('new task','exist')
+        checkListLength(3,'all')
     })
     it('Verify no empty task will added to list when plain text empty ', () => {
-        // cy.get('.new-todo').type(' {enter}')
-        insert(' {enter}')
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
+        addTaskToList(' {enter}')
+        checkListLength(2,'all')
     })
 
     //bug
     //Adding Task to List via Plain Text Entry and "All" Button Functionality
-    it('insert using click "All" button ', () => {
-        // cy.get('.new-todo').type('new task')
-        insert('new task')
-        // cy.get('[href="#/"]').click()
-        click('[href="#/"]')
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
+    it('insert using click "All" button (bug)', () => {
+        addTaskToList('new task')
+        checkListLength(2,'all')
     })
 
     //bug
     //Adding Task to List via Plain Text Entry and "Active" Button Functionality
     it('insert using click "Active" button" (bug)', () => {
-        // cy.get('.new-todo').type('new task')
-        insert('new task')
-        // cy.get('[href="#/active"]').click()
-        click('[href="#/active"]')
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
+        addTaskToList('new task')
+        displayAndSwitchTaskType('active')
+        checkListLength(2,'active')
     })
 
     //bug
     //Adding Task to List via Plain Text Entry and "Completed" Button Functionality
     it('insert using click "Complete" button (bug)', () => {
-        // cy.get('.new-todo').type('new task')
-        insert('new task')
-        // cy.get('[href="#/completed"]').click()
-        click('[href="#/completed"]')
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
+        addTaskToList('new task')
+        displayAndSwitchTaskType('completed')
+        checkListLength(2,'all')
     })
 
     //bug
     //Adding Task to List via Plain Text Entry and "Clear completed" Button Functionality
     it('insert using click "Clear completed" button (bug)', () => {
-        // cy.get('.new-todo').type('new task{enter}')
-        insert('new task {enter}')
-        // cy.contains('new task').parent().find('input').click()
-        cheak('new task')
-        // cy.get('.new-todo').type('new task1')
-        insert('new task1')
-        // cy.get('.clear-completed').click()
-        click('.clear-completed')
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
+        addTaskToList('new task {enter}')
+        changeTaskStatus('new task','completed')
+        addTaskToList('new task1')
+        clearTasks()
+        checkListLength(3,'all')
     })
     it('verify change task name', () => {
-        cy.contains('Pay electric bill').dblclick()
-        cy.contains('Pay electric bill').parent().parent().should('have.class', 'editing')
-        cy.contains('Pay electric bill').parent().get('.edit').clear().type('qqq')
-        // cy.get('[href="#/"]').click();
-        click('[href="#/"]')
-        cy.get('.todo-list li').should('contain','qqq')
-
+        changeTaskName('Pay electric bill','new task')
+        verifyTheExisenceOfTask('Pay electric bill','all')
     })
     it('Verify "All" button will contain all task', () => {
-        // cy.get('.new-todo').type('new task {enter}')
-        insert('new task {enter}')
-        // cy.contains('new task').parent().find('input').click()
-        cheak('new text')
-        // cy.get('[href="#/"]').click();
-        click('[href="#/"]')
-        // cy.get('.todo-list li').should('have.length', 3)//
-        verify_length(3)
+        addTaskToList('new task {enter}')
+        changeTaskStatus('new task','completed')
+        checkListLength(3,'all')
     })
     it('verify "active" button will contain all active task ', () => {
-        // cy.get('.new-todo').type('new task {enter}')
-        insert('new task {enter}')
-        // cy.get('.new-todo').type('new task1 {enter}')
-        insert('new task1 {enter}')
-        cy.get('.todo-list').within(() => {
-            // cy.contains('Pay electric bill').parent().find('input').check()
-            cheak('Pay electric bill')
-        })
-        // cy.get('[href="#/active"]').click()
-        click('[href="#/active"]')
-        // cy.get('.todo-list li').should('have.length', 3)//
-        verify_length(3)
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).should('have.class', '')
-        })
+        addTaskToList('new task {enter}')
+        addTaskToList('new task1 {enter}')
+        changeTaskStatus('new task','completed')
+        checkListLength(3,'active')
     })
-
+    
     //bug
     // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
-    it.only('Verify Active task empty when all task is completed', () => {
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).parent().find('input').check()
-        })
-        // cy.get('[href="#/active"]').click()
-        click('[href="#/active"]')
-        // cy.get('.todo-list li').should('have.length', 0)//
-        verify_length(0)
-    })
+    it('Verify Active task empty when all task is completed (bug)', () => {
+        changeTaskStatus('Pay electric bill','completed')
+        changeTaskStatus('Walk the dog','completed')
+        checkListLength(0,'active')
+    });
     it('Verify "completed" button will contain all completed task', () => {
-        // cy.get('.new-todo').type('new task {enter}')
-        insert('new task {enter}')
-        // cy.get('.new-todo').type('new task1 {enter}')
-        insert('new task1 {enter}')
-        cy.get('.todo-list').within(() => {
-            // cy.contains('new task').parent().find('input').check()
-            cheak('new task')
-        })
-        cy.get('.todo-list').within(() => {
-            // cy.contains('new task1').parent().find('input').check()
-            cheak('new task1')
-        })
-        // cy.get('[href="#/completed"]').click()
-        click('[href="#/completed"]')
-        // cy.get('.todo-list li').should('have.length', 2)//
-        verify_length(2)
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).should('have.class', 'completed')
-        })
+        addTaskToList('new task {enter}')
+        addTaskToList('new task1 {enter}')
+        changeTaskStatus('new task','completed')
+        changeTaskStatus('new task1','completed')
+        checkListLength(2,'comleted')
+        checkListLength(2,'active')
     })
     it('Verify completed task empty when all task is active', () => {
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).should('have.class', '')
-        })
-        // cy.get('[href="#/completed"]').click()
-        click('[href="#/completed"]')
-        // cy.get('.todo-list li').should('have.length', 0)//
-        verify_length(0)
+        checkListLength(2,'all')
+        checkListLength(2,'active')
+        checkListLength(0,'completed')
     })
     it('Verify Hidden Task Upon Changing State to Completed in Active Tasks List', () => {
-        cy.get('[href="#/active"]').click()
-        // cy.contains('Pay electric bill').parent().find('input').check()
-        cheak('Pay electric bill')
-        cy.contains('Pay electric bill').should('not.exist')
-        // cy.get('[href="#/completed"]').click();
-        click('[href="#/completed"]')
-        cy.get('.todo-list').should('contain', 'Pay electric bill');
+        displayAndSwitchTaskType('active')
+        changeTaskStatus('Pay electric bill','completed')
+        displayAndSwitchTaskType('active')
+        verifyTheExisenceOfTask('Pay electric bill','not exist')
+        displayAndSwitchTaskType('completed')
+        verifyTheExisenceOfTask('Pay electric bill','exist')
     })
     it('Verify Hidden Task Upon Changing State to Active in Completed Tasks List', () => {
-        // cy.get('.new-todo').type('new task {enter}')
-        insert('new task {enter}')
-        // cy.contains('new task').parent().find('input').check()
-        cheak('new task')
-        // cy.contains('Pay electric bill').parent().find('input').check()
-        cheak('Pay electric bill')
-        // cy.get('[href="#/completed"]').click()
-        click('[href="#/completed"]')
-        cy.contains('Pay electric bill').parent().find('input').uncheck()
-        // to not use exist
-        cy.contains('Pay electric bill').should('not.exist')
-        // cy.get('[href="#/active"]').click();
-        click('[href="#/active"]')
-        cy.get('.todo-list').should('contain', 'Pay electric bill');
+        addTaskToList('new task {enter}')
+        changeTaskStatus('new task','completed')
+        changeTaskStatus('Pay electric bill','completed')
+        displayAndSwitchTaskType('completed')
+        changeTaskStatus('new task','active')
+        displayAndSwitchTaskType('completed')
+        verifyTheExisenceOfTask('new task','not exist')
+        displayAndSwitchTaskType('active')
+        verifyTheExisenceOfTask('new task','exist')
     })
     it('Verify the "Clear completed" button will be hidden when all data in list is active', () => {
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).should('have.class', '')
-        })
-        cy.get('.clear-completed').should('have.css', 'display', 'none')
+        checkListLength(2,'all')
+        checkListLength(2,'active')
+        checkElementAttribute('.clear-completed','have.css','display','none')
     })
     it('Verify the "Clear completed" button will be unhidden when exist completed data in list', () => {
-        // cy.contains('Pay electric bill').parent().find('input').check()
-        cheak('Pay electric bill')
-        cy.get('.clear-completed').should('have.css', 'display', 'block')
+        changeTaskStatus('Pay electric bill','completed')
+        checkElementAttribute('.clear-completed','have.css','display','block')
     })
     it('Delete more than one completed task and verify all task deleted from list', () => {
-        // cy.get('.new-todo').type('new task {enter}')
-        insert('new task {enter}')
-        // cy.contains('Pay electric bill').parent().find('input').check()
-        cheak('Pay electric bill')
-        // cy.contains('new task').parent().find('input').check()
-        cheak('new task')
-        // cy.get('.clear-completed').click()
-        click('.clear-completed')
-        // cy.get('[href="#/"]').click()
-        click('[href="#/"]')
-        // cy.get('.todo-list li').should('have.length', 1)//
-        verify_length(1)
-        cy.get('.todo-list').should('not.contain', 'Pay electric bill')
-        cy.get('.todo-list').should('not.contain', 'new task')
+        addTaskToList('new task {enter}')
+        changeTaskStatus('Pay electric bill','completed')
+        changeTaskStatus('new task','completed')
+        clearTasks()
+        checkListLength(1,'all')
+        verifyTheExisenceOfTask('Pay electric bill','not exist')
+        verifyTheExisenceOfTask('new task','not exist')
     })
     it('Delete task when click "X" button', () => {
-        cy.contains('Pay electric bill').parent().find('.destroy').click({ force: true })
-        // cy.get('[href="#/"]').click()
-        click('[href="#/"]')
-        // cy.get('.todo-list li').should('have.length', 1)//
-        verify_length(1)
-        cy.get('.todo-list').should('not.contain', 'Pay electric bill')
+        clearTasks('Pay electric bill')
+        checkListLength(1,'all')
+        verifyTheExisenceOfTask('Pay electric bill','not exist')
     })
     it('Verify change state when click in checkbox from active to completed', () => {
-        // cy.contains('Pay electric bill').parent().find('input').check()
-        cheak('Pay electric bill')
-        cy.contains('Pay electric bill').parent().parent().should('have.class', 'completed')
+        changeTaskStatus('Pay electric bill','completed')
+        displayAndSwitchTaskType('active')
+        verifyTheExisenceOfTask('Pay electric bill','not exist')
+        displayAndSwitchTaskType('completed')
+        verifyTheExisenceOfTask('Pay electric bill','exist')
     })
     it('Verify change state when click in checkbox from completed to active', () => {
-        // cy.contains('Pay electric bill').parent().find('input').check()
-        cheak('Pay electric bill')
-        cy.contains('Pay electric bill').parent().find('input').uncheck()
-        cy.contains('Pay electric bill').parent().parent().should('have.class', '')
-    })
-    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
-    it('change all tasks to completed using button above  "toggle button"', () => {
-        // cy.get('.main [for="toggle-all"]').click()
-        click('.main [for="toggle-all"]')
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).should('have.class', 'completed')
-        })
+        addTaskToList('new task{enter}')
+        changeTaskStatus('new task','completed')
+        changeTaskStatus('Pay electric bill','completed')
+        changeTaskStatus('Pay electric bill','active')
+        displayAndSwitchTaskType('active')
+        verifyTheExisenceOfTask('Pay electric bill','exist')
+        displayAndSwitchTaskType('completed')
+        verifyTheExisenceOfTask('Pay electric bill','not exist')
     })
 
     //bug
     // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
-    it('change all tasks to active using button above checkboxs "toggle button"', () => {
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).parent().find('input').check()
-        })
-        // cy.get('.main [for="toggle-all"]').click()
-        click('.main [for="toggle-all"]')
-        cy.get('.todo-list li').each(($li) => {
-            cy.wrap($li).should('have.class', '')
-        })
+    it('change all tasks to completed using button above checkboxs "toggle button" (bug)', () => {
+        toggleClick()
+        checkListLength(2,'all')
+        checkListLength(2,'completed')
+    })
+
+    //bug
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
+    it('change all tasks to active using button above checkboxs "toggle button" (bug)', () => {
+        changeTaskStatus('Pay electric bill','completed')
+        changeTaskStatus('Walk the dog','completed')
+        toggleClick()
+        checkListLength(2,'all')
+        checkListLength(2,'active')
     })
 
     //bug
     // Unable to Mark Second Default Task ("Walk the Dog") as Completed
-    it('change all tasks to active using button above checkboxs "toggle button"', () => {
-        // cy.get('.main [for="toggle-all"]').click()
-        click('.main [for="toggle-all"]')
-        
-        // cy.get('.main [for="toggle-all"]').click()
-        click('.main [for="toggle-all"]')
-        cy.get('.todo-list li').each(($li) => {
-        cy.wrap($li).should('have.class', '')
-        })
+    it('change all tasks to active using button above checkboxs "toggle button" (bug)', () => {
+        toggleClick()
+        toggleClick()
+        checkListLength(2,'all')
+        checkListLength(2,'active')
     })
 })
-
