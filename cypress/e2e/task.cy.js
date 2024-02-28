@@ -1,4 +1,3 @@
-
 //type : all,active,completed
 const checkListLength = (length, type) => {//edit
     displayAndSwitchTaskType(type)
@@ -7,102 +6,92 @@ const checkListLength = (length, type) => {//edit
 }
 //type : all,active,completed
 const displayAndSwitchTaskType = (type) => {//edit
+   
     if (type == 'all') {
-        cy.get('.todo-list li')
-          .get('[href="#/"]')
+        cy.get('.filters [href="#/"]')
           .click()
     }else{
-        cy.get('.todo-list li')
-          .get(`[href="#/${type}"]`)
+        cy.get(`.filters [href="#/${type}"]`)
           .click()
     }
 }
-const clearTasks = (taskname = null) => {
-    if (taskname == null) {
+const clearTasks = (taskName = null) => {
+    if (taskName == null) {
         cy.get('.clear-completed')
           .click()
     } else {
-        cy.contains(taskname)
+        cy.contains(taskName)
           .parent()
           .find('.destroy')
           .click({ force: true })
     }
 }
-const addTaskToList = (taskname) => {//edit
+const addTaskToList = (taskName) => {//edit
     cy.get('.new-todo')
       .clear()
-      .type(taskname)
+      .type(taskName)
 }
-//status : active,completed
-const changeTaskStatus = (taskname, status) => {
-    displayAndSwitchTaskType('all')
-    if (status == 'completed') {
-        cy.contains(taskname)
-          .parent()
-          .find('input')
-          .check()
-    } else {
-        cy.contains(taskname)
-          .parent()
-          .find('input')
-          .uncheck()
-    }
-}
-const verifyTheExisenceOfTask = (taskname, option) => {//edit
-    let x = (option=='exist') ? 'contain' : 'not contain'
-    cy.get('.todo-list li')
-      .should(x, taskname)
-}
-const changeTaskName = (oldname, newname) => {
-    cy.contains(oldname)
+const changeTaskName = (oldName, newName) => {
+    cy.contains(oldName)
       .dblclick()
-    
-    cy.contains(oldname)
+    //   cy.contains('Pay electric bill').parentsUntil().eq(1).should('have.class','')
+    cy.contains(oldName)
       .parent()
       .parent()
       .should('have.class', 'editing')
-    
-    cy.contains(oldname)
+    cy.contains(oldName)
       .parent()
       .get('.edit')
       .clear()
-      .type(newname)
+      .type(newName)
 }
 const toggleClick = () => {
     cy.get('.main [for="toggle-all"]')
       .click()
 }
-const checkElementAttribute = (element, shouldtype, attribut_type, attribute_value) => {
+const checkElementAttribute = (element, shouldType, attributName, attributeValue) => {
     cy.get(element)
-      .should(shouldtype, attribut_type, attribute_value)
+      .should(shouldType, attributName, attributeValue)
 }
-const changeArrayTaskStatus = (taskname, status) => {
+const changeTasksStatus = (taskName, status) => {
     displayAndSwitchTaskType('all')
-    cy.wrap(taskname).then((name) => {
+    cy.wrap(taskName).then((name) => {
         for (let i = 0; i < name.length; i++) {
             if (status == 'completed') {
-                cy.contains(taskname[i]).parent().find('input').check()
+                cy.contains(taskName[i]).parent().find('input').check()
             } else {
-                cy.contains(taskname[i]).parent().find('input').uncheck()
+                cy.contains(taskName[i]).parent().find('input').uncheck()
             }
         }
     })
 }
+const verifyTheExisenceOfTasks = (taskName, isExist) => {//edit
+    let x = isExist ? 'contain' : 'not.contain'
+    taskName.forEach(task => {
+        cy.get('.todo-list').should(x, task.name);
+      });
+}
+const verifyTheExisenceOfTaskANOTHERWAY = (taskName) => {//edit
+    taskName.forEach(task => {
+        let x = task.Exist ? 'contain' : 'not.contain'
+        cy.get('.todo-list').should(x, task.name);
+      });
+}
+
 
 describe('test cases for todos', () => {
     beforeEach(() => {
         cy.visit('https://example.cypress.io/todo#/');
     })
-    it.only('Verify the list contains two default tasks', () => {
+    it('Verify the list contains two default tasks', () => {
         cy.get('.todo-list').should('be.visible');
         checkListLength(2, 'all')
-        verifyTheExisenceOfTask('Pay electric bill', 'exist')
-        verifyTheExisenceOfTask('Walk the dog', 'exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'},{name:'Walk the dog'}],true)
+        // verifyTheExisenceOfTask2([{name:'Pay electric bill',Exist:true},{name:'Walk the dog',Exist:true}])
     })
-
-    it.only('add new task and verify it is added', () => {
+    it('add new task and verify it is added', () => {
         addTaskToList('new task{enter}')
-        verifyTheExisenceOfTask('new task', 'exist')
+        verifyTheExisenceOfTasks([{name:'new task'}],true)
         checkListLength(3, 'all')
     })
     it('Verify no empty task will added to list when plain text empty ', () => {
@@ -137,41 +126,41 @@ describe('test cases for todos', () => {
     //Adding Task to List via Plain Text Entry and "Clear completed" Button Functionality
     it('insert using click "Clear completed" button (bug)', () => {
         addTaskToList('new task {enter}')
-        changeTaskStatus('new task', 'completed')
+        changeTasksStatus(['new task'],'completed')
         addTaskToList('new task1')
         clearTasks()
         checkListLength(3, 'all')
     })
     it('verify change task name', () => {
         changeTaskName('Pay electric bill', 'new task')
-        verifyTheExisenceOfTask('Pay electric bill', 'all')
+        displayAndSwitchTaskType('all')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],false)
     })
-    it.only('Verify "All" button will contain all task', () => {
+    it('Verify "All" button will contain all task', () => {
         addTaskToList('new task {enter}')
-        changeTaskStatus('new task', 'completed')
+        changeTasksStatus(['new task'],'completed')
         checkListLength(3, 'all')
     })
     it('verify "active" button will contain all active task ', () => {
         addTaskToList('new task {enter}')
         addTaskToList('new task1 {enter}')
-        changeTaskStatus('new task', 'completed')
+        changeTasksStatus(['new task'],'completed')
         checkListLength(3, 'active')
     })
 
     //bug
-    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed
     it('Verify Active task empty when all task is completed (bug)', () => {
-        changeTaskStatus('Pay electric bill', 'completed')
-        changeTaskStatus('Walk the dog', 'completed')
+        changeTasksStatus(['Pay electric bill','Walk the dog'],'completed')
         checkListLength(0, 'active')
     });
     it('Verify "completed" button will contain all completed task', () => {
         addTaskToList('new task {enter}')
         addTaskToList('new task1 {enter}')
-        changeTaskStatus('new task', 'completed')
-        changeTaskStatus('new task1', 'completed')
-        checkListLength(2, 'comleted')
-        checkListLength(2, 'active')
+        changeTasksStatus(['new task','new task1'],'completed')
+        checkListLength(2, 'completed')
+        displayAndSwitchTaskType('completed')
+        verifyTheExisenceOfTasks([{name:'new task'},{name:'new task1'}],true)
     })
     it('Verify completed task empty when all task is active', () => {
         checkListLength(2, 'all')
@@ -180,22 +169,21 @@ describe('test cases for todos', () => {
     })
     it('Verify Hidden Task Upon Changing State to Completed in Active Tasks List', () => {
         displayAndSwitchTaskType('active')
-        changeTaskStatus('Pay electric bill', 'completed')
+        changeTasksStatus(['Pay electric bill'],'completed')
         displayAndSwitchTaskType('active')
-        verifyTheExisenceOfTask('Pay electric bill', 'not exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],false)
         displayAndSwitchTaskType('completed')
-        verifyTheExisenceOfTask('Pay electric bill', 'exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],true)
     })
     it('Verify Hidden Task Upon Changing State to Active in Completed Tasks List', () => {
         addTaskToList('new task {enter}')
-        changeTaskStatus('new task', 'completed')
-        changeTaskStatus('Pay electric bill', 'completed')
+        changeTasksStatus(['new task','Pay electric bill'],'completed')
         displayAndSwitchTaskType('completed')
-        changeTaskStatus('new task', 'active')
+        changeTasksStatus(['new task'],'active')
         displayAndSwitchTaskType('completed')
-        verifyTheExisenceOfTask('new task', 'not exist')
+        verifyTheExisenceOfTasks([{name:'new task'}],false)
         displayAndSwitchTaskType('active')
-        verifyTheExisenceOfTask('new task', 'exist')
+        verifyTheExisenceOfTasks([{name:'new task'}],true)
     })
     it('Verify the "Clear completed" button will be hidden when all data in list is active', () => {
         checkListLength(2, 'all')
@@ -203,43 +191,40 @@ describe('test cases for todos', () => {
         checkElementAttribute('.clear-completed', 'have.css', 'display', 'none')
     })
     it('Verify the "Clear completed" button will be unhidden when exist completed data in list', () => {
-        changeTaskStatus('Pay electric bill', 'completed')
+        changeTasksStatus(['Pay electric bill'],'completed')
         checkElementAttribute('.clear-completed', 'have.css', 'display', 'block')
     })
     it('Delete more than one completed task and verify all task deleted from list', () => {
         addTaskToList('new task {enter}')
-        changeTaskStatus('Pay electric bill', 'completed')
-        changeTaskStatus('new task', 'completed')
+        changeTasksStatus(['Pay electric bill','new task'],'completed')
         clearTasks()
         checkListLength(1, 'all')
-        verifyTheExisenceOfTask('Pay electric bill', 'not exist')
-        verifyTheExisenceOfTask('new task', 'not exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'},{name:'new task'}],false)
     })
     it('Delete task when click "X" button', () => {
         clearTasks('Pay electric bill')
         checkListLength(1, 'all')
-        verifyTheExisenceOfTask('Pay electric bill', 'not exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],false)
     })
     it('Verify change state when click in checkbox from active to completed', () => {
-        changeTaskStatus('Pay electric bill', 'completed')
+        changeTasksStatus(['Pay electric bill'],'completed')
         displayAndSwitchTaskType('active')
-        verifyTheExisenceOfTask('Pay electric bill', 'not exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],false)
         displayAndSwitchTaskType('completed')
-        verifyTheExisenceOfTask('Pay electric bill', 'exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],true)
     })
     it('Verify change state when click in checkbox from completed to active', () => {
         addTaskToList('new task{enter}')
-        changeTaskStatus('new task', 'completed')
-        changeTaskStatus('Pay electric bill', 'completed')
-        changeTaskStatus('Pay electric bill', 'active')
+        changeTasksStatus(['Pay electric bill','new task'],'completed')
+        changeTasksStatus(['Pay electric bill'],'active')
         displayAndSwitchTaskType('active')
-        verifyTheExisenceOfTask('Pay electric bill', 'exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],true)
         displayAndSwitchTaskType('completed')
-        verifyTheExisenceOfTask('Pay electric bill', 'not exist')
+        verifyTheExisenceOfTasks([{name:'Pay electric bill'}],false)
     })
 
     //bug
-    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed
     it('change all tasks to completed using button above checkboxs "toggle button" (bug)', () => {
         toggleClick()
         checkListLength(2, 'all')
@@ -247,10 +232,9 @@ describe('test cases for todos', () => {
     })
 
     //bug
-    // Unable to Mark Second Default Task ("Walk the Dog") as Completed 
+    // Unable to Mark Second Default Task ("Walk the Dog") as Completed
     it('change all tasks to active using button above checkboxs "toggle button" (bug)', () => {
-        changeTaskStatus('Pay electric bill', 'completed')
-        changeTaskStatus('Walk the dog', 'completed')
+        changeTasksStatus(['Pay electric bill','Walk the dog'],'completed')
         toggleClick()
         checkListLength(2, 'all')
         checkListLength(2, 'active')
@@ -263,22 +247,5 @@ describe('test cases for todos', () => {
         toggleClick()
         checkListLength(2, 'all')
         checkListLength(2, 'active')
-    })
-
-
-    it('test change status to array of task', () => {
-        cy.visit('https://example.cypress.io/todo#/');
-        addTaskToList('new text{enter}')
-        addTaskToList('new text1{enter}')
-    
-        cy.get('.todo-list li').then((text) => {
-            var texts = []
-            for (let i = 0; i < 3; i++) {
-                cy.get(text.eq(i)).invoke('text').then((x) => {
-                    texts.push(x);
-                })
-            }
-            changeArrayTaskStatus1(texts, 'completed')
-        })
     })
 })
