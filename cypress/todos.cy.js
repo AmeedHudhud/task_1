@@ -1,13 +1,13 @@
-import {LOCATORS} from '../support/todoshelper'
-import {checkListLength} from '../support/todoshelper'
-import {displayAndSwitchTaskType} from '../support/todoshelper'
-import {clearTasks} from '../support/todoshelper'
-import {addTaskToList} from '../support/todoshelper'
-import {changeTaskName} from '../support/todoshelper'
-import {toggleClick} from '../support/todoshelper'
-import {checkElementAttribute} from '../support/todoshelper'
-import {changeTasksStatus} from '../support/todoshelper'
-import {verifyTheExisenceOfTasks} from '../support/todoshelper'
+import {LOCATORS} from '../cypress/support/todoshelper'
+import {checkListLength} from '../cypress/support/todoshelper'
+import {displayAndSwitchTaskType} from '../cypress/support/todoshelper'
+import {clearTasks} from '../cypress/support/todoshelper'
+import {addTaskToList} from '../cypress/support/todoshelper'
+import {changeTaskName} from '../cypress/support/todoshelper'
+import {toggleClick} from '../cypress/support/todoshelper'
+import {checkElementAttribute} from '../cypress/support/todoshelper'
+import {changeTasksStatus} from '../cypress/support/todoshelper'
+import {verifyTheExisenceOfTasks} from '../cypress/support/todoshelper'
 
 const x = [{name:'Pay electric bill',Exist:true},{name:'Walk the dog',Exist:true}]
 const x2 = [{name:'new task',Exist:true}]
