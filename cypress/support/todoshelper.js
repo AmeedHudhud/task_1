@@ -69,10 +69,15 @@ export const verifyTheExisenceOfTasks = (taskName) => {
       cy.get('.todo-list').should(x, task.name);
     });
 }
-
 export const LOCATORS = {
     todoList: '.todo-list',
     addButton: '.add-button',
+    listrows : '.todo-list li',
+    allbutton : '.filters [href="#/"]',
+    completeactivebutton : `.filters [href="#/${type}"]` ,
+    clearbutton : '.clear-completed',
+    destroy : '.destroy',
+    textfield : '.new-todo',
+    edit : '.edit',
+    toggle : '.main [for="toggle-all"]',
   };
-
-  
